@@ -633,7 +633,9 @@ STATIC_ASSERT(__cpp_lib_math_special_functions == 201603L);
 #error __cpp_lib_math_special_functions is defined
 #endif
 
-#if _HAS_CXX23
+#if _HAS_CXX26
+STATIC_ASSERT(__cpp_lib_mdspan == 202406L);
+#elif _HAS_CXX23
 STATIC_ASSERT(__cpp_lib_mdspan == 202207L);
 #elif defined(__cpp_lib_mdspan)
 #error __cpp_lib_mdspan is defined

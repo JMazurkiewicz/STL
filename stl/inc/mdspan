@@ -331,6 +331,11 @@ struct _Dextents_impl<_IndexType, index_sequence<_Indices...>> {
 _EXPORT_STD template <class _IndexType, size_t _Rank>
 using dextents = _Dextents_impl<_IndexType, make_index_sequence<_Rank>>::type;
 
+#if _HAS_CXX26
+_EXPORT_STD template <size_t _Rank, class _IndexType = size_t>
+using dims = _Dextents_impl<_IndexType, make_index_sequence<_Rank>>::type;
+#endif // _HAS_CXX26
+
 template <class _Ty>
 constexpr bool _Is_extents = false;
 
