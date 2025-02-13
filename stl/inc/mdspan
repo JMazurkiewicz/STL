@@ -472,7 +472,7 @@ struct _Maybe_fully_static_extents<_Extents> {
 };
 
 template <class _Extents>
-class layout_left::mapping : private _Maybe_fully_static_extents<_Extents> {
+class layout_left::mapping {
 public:
     using extents_type = _Extents;
     using index_type   = extents_type::index_type;
@@ -481,8 +481,6 @@ public:
     using layout_type  = layout_left;
 
 private:
-    using _Base = _Maybe_fully_static_extents<extents_type>;
-
     static_assert(_Is_extents<extents_type>,
         "Extents must be a specialization of std::extents (N4950 [mdspan.layout.left.overview]/2).");
     static_assert(
@@ -494,7 +492,7 @@ public:
     constexpr mapping() noexcept               = default;
     constexpr mapping(const mapping&) noexcept = default;
 
-    constexpr mapping(const extents_type& _Exts_) noexcept : _Base(_Exts_) {
+    constexpr mapping(const extents_type& _Exts_) noexcept : _Exts(_Exts_) {
 #if _ITERATOR_DEBUG_LEVEL != 0
         if constexpr (extents_type::rank_dynamic() != 0) {
             _STL_VERIFY(_Exts_._Is_dynamic_multidim_index_space_size_representable(),
@@ -508,7 +506,7 @@ public:
         requires is_constructible_v<extents_type, _OtherExtents>
     constexpr explicit(!is_convertible_v<_OtherExtents, extents_type>)
         mapping(const mapping<_OtherExtents>& _Other) noexcept
-        : _Base(_Other.extents()) {
+        : _Exts(_Other.extents()) {
 #if _ITERATOR_DEBUG_LEVEL != 0
         _STL_VERIFY(_STD in_range<index_type>(_Other.required_span_size()),
             "Value of other.required_span_size() must be representable as a value of type index_type (N4950 "
@@ -520,7 +518,7 @@ public:
         requires (extents_type::rank() <= 1) && is_constructible_v<extents_type, _OtherExtents>
     constexpr explicit(!is_convertible_v<_OtherExtents, extents_type>)
         mapping(const layout_right::mapping<_OtherExtents>& _Other) noexcept
-        : _Base(_Other.extents()) {
+        : _Exts(_Other.extents()) {
 #if _ITERATOR_DEBUG_LEVEL != 0
         _STL_VERIFY(_STD in_range<index_type>(_Other.required_span_size()),
             "Value of other.required_span_size() must be representable as a value of type index_type (N4950 "
@@ -532,7 +530,7 @@ public:
         requires is_constructible_v<extents_type, _OtherExtents>
     constexpr explicit(extents_type::rank() > 0)
         mapping(const layout_stride::mapping<_OtherExtents>& _Other) noexcept // strengthened
-        : _Base(_Other.extents()) {
+        : _Exts(_Other.extents()) {
 #if _ITERATOR_DEBUG_LEVEL != 0
         if constexpr (extents_type::rank() > 0) {
             index_type _Prod = 1;
@@ -623,6 +621,8 @@ private:
         (((_Result += _Indices * _Stride), (_Stride *= this->_Exts.extent(_Seq))), ...);
         return _Result;
     }
+
+    [[msvc::no_unique_address]] extents_type _Exts{};
 };
 
 template <class _Extents>
