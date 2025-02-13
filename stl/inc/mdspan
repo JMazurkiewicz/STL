@@ -785,8 +785,7 @@ concept _Layout_mapping_alike = requires {
 };
 
 template <class _Extents>
-class layout_stride::mapping : private _Maybe_fully_static_extents<_Extents>,
-                               private _Maybe_empty_array<typename _Extents::index_type, _Extents::rank()> {
+class layout_stride::mapping : private _Maybe_empty_array<typename _Extents::index_type, _Extents::rank()> {
 public:
     using extents_type = _Extents;
     using index_type   = extents_type::index_type;
@@ -795,7 +794,6 @@ public:
     using layout_type  = layout_stride;
 
 private:
-    using _Extents_base = _Maybe_fully_static_extents<extents_type>;
     using _Strides_base = _Maybe_empty_array<index_type, _Extents::rank()>;
 
     static_assert(_Is_extents<extents_type>,
@@ -808,7 +806,7 @@ private:
     template <class _OtherIndexType, size_t... _Indices>
     constexpr mapping(const extents_type& _Exts_, span<_OtherIndexType, extents_type::rank()> _Strides_,
         index_sequence<_Indices...>) noexcept
-        : _Extents_base(_Exts_), _Strides_base{static_cast<index_type>(_STD as_const(_Strides_[_Indices]))...} {
+        : _Strides_base{static_cast<index_type>(_STD as_const(_Strides_[_Indices]))...}, _Exts(_Exts_) {
         _STL_INTERNAL_STATIC_ASSERT(is_convertible_v<const _OtherIndexType&, index_type>
                                     && is_nothrow_constructible_v<index_type, const _OtherIndexType&>);
 #if _ITERATOR_DEBUG_LEVEL != 0
@@ -838,7 +836,7 @@ private:
     }
 
 public:
-    constexpr mapping() noexcept : _Extents_base(extents_type{}) {
+    constexpr mapping() noexcept : _Exts(extents_type{}) {
         if constexpr (extents_type::rank() != 0) {
             this->_Array.back() = 1;
             for (rank_type _Idx = extents_type::_Rank - 1; _Idx-- > 0;) {
@@ -882,7 +880,7 @@ public:
         && (_Is_mapping_of<layout_left, _StridedLayoutMapping> || _Is_mapping_of<layout_right, _StridedLayoutMapping>
             || _Is_mapping_of<layout_stride, _StridedLayoutMapping>) ))
         mapping(const _StridedLayoutMapping& _Other) noexcept
-        : _Extents_base(_Other.extents()) {
+        : _Exts(_Other.extents()) {
 #if _ITERATOR_DEBUG_LEVEL != 0
         _STL_VERIFY(_STD in_range<index_type>(_Other.required_span_size()),
             "Value of other.required_span_size() must be representable as a value of type index_type (N4950 "
@@ -1032,6 +1030,8 @@ private:
 
         return static_cast<index_type>(((_Indices * this->_Array[_Seq]) + ... + 0));
     }
+
+    [[msvc::no_unique_address]] extents_type _Exts{};
 };
 
 _EXPORT_STD template <class _ElementType>
