@@ -41,9 +41,6 @@ struct _Maybe_empty_array<_IndexType, 0> {
     using type = _Empty_array;
 };
 
-template <size_t... _Extents>
-constexpr size_t _Calculate_rank_dynamic = (static_cast<size_t>(_Extents == dynamic_extent) + ... + 0);
-
 struct _Extents_from_tuple {
     explicit _Extents_from_tuple() = default;
 };
@@ -61,8 +58,8 @@ public:
         "Each element of Extents must either be equal to dynamic_extent, or be representable as a value of type "
         "IndexType (N4950 [mdspan.extents.overview]/1.2).");
 
-    static constexpr rank_type _Rank                                = sizeof...(_Extents);
-    static constexpr rank_type _Rank_dynamic                        = _Calculate_rank_dynamic<_Extents...>;
+    static constexpr rank_type _Rank         = sizeof...(_Extents);
+    static constexpr rank_type _Rank_dynamic = (static_cast<size_t>(_Extents == dynamic_extent) + ... + 0);
     static constexpr array<rank_type, _Rank> _Static_extents        = {_Extents...};
     static constexpr bool _Multidim_index_space_size_is_always_zero = ((_Extents == 0) || ...);
 
