@@ -1067,52 +1067,6 @@ struct default_accessor {
     }
 };
 
-template <class _LayoutPolicy, class _Extents>
-concept _Elidable_layout_mapping =
-    (_Is_any_of_v<_LayoutPolicy, layout_left, layout_right> && _Extents::rank_dynamic() == 0)
-    || (same_as<_LayoutPolicy, layout_stride> && _Extents::rank() == 0);
-
-template <class _Extents, class _LayoutPolicy>
-struct _Mdspan_mapping_base {
-    _STL_INTERNAL_STATIC_ASSERT(_Is_extents<_Extents>);
-
-    using _Mapping = _LayoutPolicy::template mapping<_Extents>;
-
-    constexpr _Mdspan_mapping_base() noexcept = default;
-
-    constexpr explicit _Mdspan_mapping_base(const _Extents& _Exts) : _Map(_Exts) {}
-
-    constexpr explicit _Mdspan_mapping_base(_Extents&& _Exts) : _Map(_STD move(_Exts)) {}
-
-    template <class _OtherMapping>
-    constexpr explicit _Mdspan_mapping_base(const _OtherMapping& _Map_) : _Map(_Map_) {}
-
-    _Mapping _Map = _Mapping();
-};
-
-template <class _Extents, _Elidable_layout_mapping<_Extents> _LayoutPolicy>
-struct _Mdspan_mapping_base<_Extents, _LayoutPolicy> {
-    _STL_INTERNAL_STATIC_ASSERT(_Is_extents<_Extents>);
-
-    using _Mapping = _LayoutPolicy::template mapping<_Extents>;
-
-    constexpr _Mdspan_mapping_base() noexcept = default;
-
-    constexpr explicit _Mdspan_mapping_base(const _Extents&) noexcept {}
-
-    constexpr explicit _Mdspan_mapping_base(_Extents&&) noexcept {}
-
-    template <class _OtherMapping>
-    constexpr explicit _Mdspan_mapping_base(const _OtherMapping& _Map_) {
-        // NB: Constructing _Mapping from _OtherMapping may have side effects - we should create a temporary.
-        if constexpr (!_Elidable_layout_mapping<typename _OtherMapping::layout_type, _Extents>) {
-            (void) _Mapping{_Map_};
-        }
-    }
-
-    static constexpr _Mapping _Map{};
-};
-
 template <class _AccessorPolicy>
 concept _Elidable_accessor_policy = _Is_specialization_v<_AccessorPolicy, default_accessor>;
 
