@@ -39,8 +39,6 @@ enum class _Mdspan_array_tag {
 template <class _IndexType, size_t _Size, _Mdspan_array_tag _Tag = _Mdspan_array_tag::_Ignore>
 struct _Maybe_empty_array {
     using type = array<_IndexType, _Size>;
-
-    array<_IndexType, _Size> _Array{};
 };
 
 template <_Mdspan_array_tag>
