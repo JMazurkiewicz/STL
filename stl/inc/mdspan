@@ -1137,7 +1137,7 @@ public:
                                 && is_nothrow_default_constructible_v<accessor_type>) // strengthened
         requires (rank_dynamic() > 0) && is_default_constructible_v<data_handle_type>
                   && is_default_constructible_v<mapping_type> && is_default_constructible_v<accessor_type>
-        : _Map(), _Acc() {}
+        : _Ptr(), _Map(), _Acc() {}
 
     constexpr mdspan(const mdspan&) = default;
     constexpr mdspan(mdspan&&)      = default;
@@ -1357,7 +1357,7 @@ private:
         return _Acc.access(_Ptr, static_cast<size_t>(_Map(_Indices...)));
     }
 
-    [[msvc::no_unique_address]] data_handle_type _Ptr = data_handle_type();
+    [[msvc::no_unique_address]] data_handle_type _Ptr;
     [[msvc::no_unique_address]] mapping_type _Map;
     [[msvc::no_unique_address]] accessor_type _Acc;
 };
