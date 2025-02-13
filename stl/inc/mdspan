@@ -30,8 +30,6 @@ _STD_BEGIN
 template <class _IndexType, size_t _Size>
 struct _Maybe_empty_array {
     using type = array<_IndexType, _Size>;
-
-    array<_IndexType, _Size> _Array{};
 };
 
 struct _Empty_array {};
