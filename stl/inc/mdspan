@@ -821,7 +821,7 @@ private:
                 const index_type _Stride = this->_Array[_Idx];
                 _STL_VERIFY(_Stride > 0, "Value of s[i] must be greater than 0 for all i in the range [0, rank_) "
                                          "(N4950 [mdspan.layout.stride.cons]/4.1).");
-                const index_type _Ext = this->_Exts.extent(_Idx);
+                const index_type _Ext = _Exts.extent(_Idx);
                 if (_Ext == 0) {
                     _Found_zero = true;
                 }
@@ -858,7 +858,7 @@ public:
             for (rank_type _Idx = extents_type::_Rank - 1; _Idx-- > 0;) {
 #if _ITERATOR_DEBUG_LEVEL != 0
                 const bool _Overflow =
-                    _Mul_overflow(this->_Array[_Idx + 1], this->_Exts.extent(_Idx + 1), this->_Array[_Idx]);
+                    _Mul_overflow(this->_Array[_Idx + 1], _Exts.extent(_Idx + 1), this->_Array[_Idx]);
                 // NB: N4950 requires value of 'layout_right::mapping<extents_type>().required_span_size()' to be
                 // representable as a value of type 'index_type', but this is not enough. We need to require every
                 // single stride to be representable as a value of type 'index_type', so we can get desired effects.
@@ -866,7 +866,7 @@ public:
                     "Value of layout_right::mapping<extents_type>().required_span_size() must be "
                     "representable as a value of type index_type (N4950 [mdspan.layout.stride.cons]/1).");
 #else // ^^^ _ITERATOR_DEBUG_LEVEL != 0 / _ITERATOR_DEBUG_LEVEL == 0 vvv
-                this->_Array[_Idx] = static_cast<index_type>(this->_Array[_Idx + 1] * this->_Exts.extent(_Idx + 1));
+                this->_Array[_Idx] = static_cast<index_type>(this->_Array[_Idx + 1] * _Exts.extent(_Idx + 1));
 #endif // ^^^ _ITERATOR_DEBUG_LEVEL == 0 ^^^
             }
         }
@@ -919,7 +919,7 @@ public:
     constexpr mapping& operator=(const mapping&) noexcept = default;
 
     _NODISCARD constexpr const extents_type& extents() const noexcept {
-        return this->_Exts;
+        return _Exts;
     }
 
     _NODISCARD constexpr array<index_type, extents_type::rank()> strides() const noexcept {
@@ -936,7 +936,7 @@ public:
         } else {
             index_type _Result = 1;
             for (rank_type _Idx = 0; _Idx < extents_type::_Rank; ++_Idx) {
-                const index_type _Ext = this->_Exts.extent(_Idx);
+                const index_type _Ext = _Exts.extent(_Idx);
                 if (_Ext == 0) {
                     return 0;
                 }
@@ -989,8 +989,8 @@ public:
             //   Since we have two or more extents equal to 0 this is not possible either.
             return false;
         } else if constexpr (extents_type::rank() == 2) {
-            return (this->_Array[0] == 1 && this->_Array[1] == this->_Exts.extent(0))
-                || (this->_Array[1] == 1 && this->_Array[0] == this->_Exts.extent(1));
+            return (this->_Array[0] == 1 && this->_Array[1] == _Exts.extent(0))
+                || (this->_Array[1] == 1 && this->_Array[0] == _Exts.extent(1));
         } else {
             // NB: Extents equal to 1 are problematic too - sometimes in such cases even when the mapping is exhaustive
             // this function should return false.
@@ -1001,7 +1001,7 @@ public:
 
             if constexpr (extents_type::rank_dynamic() != 0) {
                 const auto [_Dynamic_zero_extents, _Dynamic_one_extents] =
-                    _Count_dynamic_extents_equal_to_zero_or_one(this->_Exts);
+                    _Count_dynamic_extents_equal_to_zero_or_one(_Exts);
 
                 const size_t _All_zero_extents = _Static_zero_extents + _Dynamic_zero_extents;
                 if (_All_zero_extents >= 2) {
@@ -1081,7 +1081,7 @@ private:
         [[maybe_unused]] index_sequence<_Seq...> _Index_seq, _IndexTypes... _Indices) const noexcept {
         _STL_INTERNAL_STATIC_ASSERT(conjunction_v<is_same<_IndexTypes, index_type>...>);
 #if _ITERATOR_DEBUG_LEVEL != 0
-        _STL_VERIFY(this->_Exts._Contains_multidimensional_index(_Index_seq, _Indices...),
+        _STL_VERIFY(_Exts._Contains_multidimensional_index(_Index_seq, _Indices...),
             "Value of extents_type::index-cast(i) must be a multidimensional index in extents_ (N4950 "
             "[mdspan.layout.stride.obs]/3).");
 #endif
@@ -1090,13 +1090,13 @@ private:
     }
 
     _NODISCARD constexpr bool _Is_exhaustive_common_case() const noexcept {
-        return required_span_size() == _Fwd_prod_of_extents<extents_type>::_Calculate(this->_Exts, extents_type::_Rank);
+        return required_span_size() == _Fwd_prod_of_extents<extents_type>::_Calculate(_Exts, extents_type::_Rank);
     }
 
     _NODISCARD constexpr bool _Is_exhaustive_special_case() const noexcept {
         array<_Stride_extent_pair, extents_type::rank()> _Pairs;
         for (rank_type _Idx = 0; _Idx < extents_type::_Rank; ++_Idx) {
-            rank_type _Ext = static_cast<rank_type>(this->_Exts.extent(_Idx));
+            rank_type _Ext = static_cast<rank_type>(_Exts.extent(_Idx));
             if (_Ext == 0) {
                 // NB: _Ext equal to zero is special - we want it to end up as close to the end of the sorted range as
                 // possible, so we assign max value of rank_type to it.
