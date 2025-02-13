@@ -1099,7 +1099,6 @@ public:
     using data_handle_type = accessor_type::data_handle_type;
     using reference        = accessor_type::reference;
 
-private:
     static_assert(
         sizeof(element_type) > 0, "ElementType must be a complete type (N4950 [mdspan.mdspan.overview]/2.1).");
     static_assert(
@@ -1112,7 +1111,6 @@ private:
         "ElementType and typename AccessorPolicy::element_type must be the same type (N4950 "
         "[mdspan.mdspan.overview]/2.3).");
 
-public:
     _NODISCARD _Ret_range_(==, extents_type::_Rank) static constexpr rank_type rank() noexcept {
         return extents_type::_Rank;
     }
