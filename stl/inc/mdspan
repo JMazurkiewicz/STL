@@ -1067,35 +1067,6 @@ struct default_accessor {
     }
 };
 
-template <class _AccessorPolicy>
-concept _Elidable_accessor_policy = _Is_specialization_v<_AccessorPolicy, default_accessor>;
-
-template <class _AccessorPolicy>
-struct _Mdspan_accessor_base {
-    constexpr _Mdspan_accessor_base() noexcept = default;
-
-    template <class _OtherAccessorPolicy>
-    constexpr explicit _Mdspan_accessor_base(const _OtherAccessorPolicy& _Acc_) : _Acc(_Acc_) {}
-
-    _AccessorPolicy _Acc = _AccessorPolicy();
-};
-
-template <_Elidable_accessor_policy _AccessorPolicy>
-struct _Mdspan_accessor_base<_AccessorPolicy> {
-    constexpr _Mdspan_accessor_base() noexcept = default;
-
-    template <class _OtherAccessorPolicy>
-    constexpr explicit _Mdspan_accessor_base(const _OtherAccessorPolicy& _Acc_) {
-        // NB: Constructing _AccessorPolicy from _OtherAccessorPolicy may have side effects - we should create a
-        // temporary.
-        if constexpr (!_Elidable_accessor_policy<_OtherAccessorPolicy>) {
-            (void) _AccessorPolicy{_Acc_};
-        }
-    }
-
-    static constexpr _AccessorPolicy _Acc{};
-};
-
 #if _ITERATOR_DEBUG_LEVEL != 0
 template <class _IndexType, class _OtherIndexType>
 _NODISCARD constexpr _IndexType _Mdspan_checked_index_cast(_OtherIndexType&& _Idx)
