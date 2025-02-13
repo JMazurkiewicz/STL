@@ -1160,7 +1160,7 @@ public:
     }
 
     _NODISCARD constexpr index_type extent(_In_range_(<, extents_type::_Rank) const rank_type _Idx) const noexcept {
-        return this->_Map.extents().extent(_Idx);
+        return _Map.extents().extent(_Idx);
     }
 
     constexpr mdspan() noexcept(is_nothrow_default_constructible_v<data_handle_type>
@@ -1297,20 +1297,20 @@ public:
     _NODISCARD constexpr size_type size() const noexcept {
 #if _ITERATOR_DEBUG_LEVEL != 0
         if constexpr (rank_dynamic() != 0) {
-            _STL_VERIFY(this->_Map.extents().template _Is_dynamic_multidim_index_space_size_representable<size_type>(),
+            _STL_VERIFY(_Map.extents().template _Is_dynamic_multidim_index_space_size_representable<size_type>(),
                 "The size of the multidimensional index space extents() must be representable as a value of type "
                 "size_type (N4950 [mdspan.mdspan.members]/7).");
         }
 #endif // _ITERATOR_DEBUG_LEVEL != 0
         return static_cast<size_type>(
-            _Fwd_prod_of_extents<extents_type>::_Calculate(this->_Map.extents(), extents_type::_Rank));
+            _Fwd_prod_of_extents<extents_type>::_Calculate(_Map.extents(), extents_type::_Rank));
     }
 
     _NODISCARD constexpr bool empty() const noexcept {
         if constexpr (extents_type::_Multidim_index_space_size_is_always_zero) {
             return true;
         } else {
-            const extents_type& _Exts = this->_Map.extents();
+            const extents_type& _Exts = _Map.extents();
             for (rank_type _Idx = 0; _Idx < extents_type::_Rank; ++_Idx) {
                 if (_Exts.extent(_Idx) == 0) {
                     return true;
@@ -1330,7 +1330,7 @@ public:
     }
 
     _NODISCARD constexpr const extents_type& extents() const noexcept {
-        return this->_Map.extents();
+        return _Map.extents();
     }
 
     _NODISCARD constexpr const data_handle_type& data_handle() const noexcept {
@@ -1338,7 +1338,7 @@ public:
     }
 
     _NODISCARD constexpr const mapping_type& mapping() const noexcept {
-        return this->_Map;
+        return _Map;
     }
 
     _NODISCARD constexpr const accessor_type& accessor() const noexcept {
@@ -1360,27 +1360,27 @@ public:
         return _Result;
     }
 
-    _NODISCARD constexpr bool is_unique() const noexcept(noexcept(this->_Map.is_unique())) /* strengthened */ {
-        return this->_Map.is_unique();
+    _NODISCARD constexpr bool is_unique() const noexcept(noexcept(_Map.is_unique())) /* strengthened */ {
+        return _Map.is_unique();
     }
 
-    _NODISCARD constexpr bool is_exhaustive() const noexcept(noexcept(this->_Map.is_exhaustive())) /* strengthened */ {
-        return this->_Map.is_exhaustive();
+    _NODISCARD constexpr bool is_exhaustive() const noexcept(noexcept(_Map.is_exhaustive())) /* strengthened */ {
+        return _Map.is_exhaustive();
     }
 
-    _NODISCARD constexpr bool is_strided() const noexcept(noexcept(this->_Map.is_strided())) /* strengthened */ {
-        return this->_Map.is_strided();
+    _NODISCARD constexpr bool is_strided() const noexcept(noexcept(_Map.is_strided())) /* strengthened */ {
+        return _Map.is_strided();
     }
 
     _NODISCARD constexpr index_type stride(const rank_type _Idx) const
-        noexcept(noexcept(this->_Map.stride(_Idx))) /* strengthened */ {
-        return this->_Map.stride(_Idx);
+        noexcept(noexcept(_Map.stride(_Idx))) /* strengthened */ {
+        return _Map.stride(_Idx);
     }
 
 private:
     template <class... _OtherIndexTypes>
     _NODISCARD constexpr reference _Access_impl(_OtherIndexTypes... _Indices) const
-        noexcept(noexcept(this->_Acc.access(_Ptr, static_cast<size_t>(this->_Map(_Indices...))))) {
+        noexcept(noexcept(this->_Acc.access(_Ptr, static_cast<size_t>(_Map(_Indices...))))) {
         _STL_INTERNAL_STATIC_ASSERT(conjunction_v<is_same<_OtherIndexTypes, index_type>...>);
 #if _MSVC_STL_HARDENING_MDSPAN || _ITERATOR_DEBUG_LEVEL != 0
         _STL_VERIFY(this->_Map.extents()._Contains_multidimensional_index(make_index_sequence<rank()>{}, _Indices...),
@@ -1388,7 +1388,7 @@ private:
             "a multidimensional index in extents() (N5001 [mdspan.mdspan.members]/3).");
 #endif
 
-        return this->_Acc.access(_Ptr, static_cast<size_t>(this->_Map(_Indices...)));
+        return this->_Acc.access(_Ptr, static_cast<size_t>(_Map(_Indices...)));
     }
 
     /* [[no_unique_address]] */ data_handle_type _Ptr = data_handle_type();
