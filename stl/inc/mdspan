@@ -689,7 +689,7 @@ public:
                 _STL_VERIFY(_STD cmp_equal(_Prod, _Other.stride(_Idx)),
                     "For all r in the range [0, extents_type::rank()), other.stride(r) must be equal to "
                     "extents().rev-prod-of-extents(r) (N4950 [mdspan.layout.right.cons]/10.1).");
-                _Prod = static_cast<index_type>(_Prod * this->_Exts.extent(_Idx));
+                _Prod = static_cast<index_type>(_Prod * _Exts.extent(_Idx));
             }
         }
         _STL_VERIFY(_STD in_range<index_type>(_Other.required_span_size()),
@@ -701,11 +701,11 @@ public:
     constexpr mapping& operator=(const mapping&) noexcept = default;
 
     _NODISCARD constexpr const extents_type& extents() const noexcept {
-        return this->_Exts;
+        return _Exts;
     }
 
     _NODISCARD constexpr index_type required_span_size() const noexcept {
-        return _Fwd_prod_of_extents<extents_type>::_Calculate(this->_Exts, extents_type::_Rank);
+        return _Fwd_prod_of_extents<extents_type>::_Calculate(_Exts, extents_type::_Rank);
     }
 
     template <class... _IndexTypes>
@@ -747,7 +747,7 @@ public:
         _STL_VERIFY(_Idx < extents_type::_Rank,
             "Value of i must be less than extents_type::rank() (N4950 [mdspan.layout.right.obs]/6).");
 #endif
-        return _Rev_prod_of_extents<extents_type>::_Calculate(this->_Exts, _Idx);
+        return _Rev_prod_of_extents<extents_type>::_Calculate(_Exts, _Idx);
     }
 
     template <class _OtherExtents>
@@ -762,13 +762,13 @@ private:
         [[maybe_unused]] index_sequence<_Seq...> _Index_seq, _IndexTypes... _Indices) const noexcept {
         _STL_INTERNAL_STATIC_ASSERT(conjunction_v<is_same<_IndexTypes, index_type>...>);
 #if _ITERATOR_DEBUG_LEVEL != 0
-        _STL_VERIFY(this->_Exts._Contains_multidimensional_index(_Index_seq, _Indices...),
+        _STL_VERIFY(_Exts._Contains_multidimensional_index(_Index_seq, _Indices...),
             "Value of extents_type::index-cast(i) must be a multidimensional index in extents_ (N4950 "
             "[mdspan.layout.right.obs]/3).");
 #endif
 
         index_type _Result = 0;
-        ((_Result = static_cast<index_type>(_Indices + this->_Exts.extent(_Seq) * _Result)), ...);
+        ((_Result = static_cast<index_type>(_Indices + _Exts.extent(_Seq) * _Result)), ...);
         return _Result;
     }
 
