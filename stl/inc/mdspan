@@ -1308,7 +1308,7 @@ public:
     }
 
     _NODISCARD constexpr const accessor_type& accessor() const noexcept {
-        return this->_Acc;
+        return _Acc;
     }
 
     _NODISCARD static constexpr bool is_always_unique() noexcept /* strengthened */ {
@@ -1346,7 +1346,7 @@ public:
 private:
     template <class... _OtherIndexTypes>
     _NODISCARD constexpr reference _Access_impl(_OtherIndexTypes... _Indices) const
-        noexcept(noexcept(this->_Acc.access(_Ptr, static_cast<size_t>(_Map(_Indices...))))) {
+        noexcept(noexcept(_Acc.access(_Ptr, static_cast<size_t>(_Map(_Indices...))))) {
         _STL_INTERNAL_STATIC_ASSERT(conjunction_v<is_same<_OtherIndexTypes, index_type>...>);
 #if _MSVC_STL_HARDENING_MDSPAN || _ITERATOR_DEBUG_LEVEL != 0
         _STL_VERIFY(this->_Map.extents()._Contains_multidimensional_index(make_index_sequence<rank()>{}, _Indices...),
@@ -1354,7 +1354,7 @@ private:
             "a multidimensional index in extents() (N5001 [mdspan.mdspan.members]/3).");
 #endif
 
-        return this->_Acc.access(_Ptr, static_cast<size_t>(_Map(_Indices...)));
+        return _Acc.access(_Ptr, static_cast<size_t>(_Map(_Indices...)));
     }
 
     /* [[no_unique_address]] */ data_handle_type _Ptr = data_handle_type();
