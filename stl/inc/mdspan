@@ -1114,7 +1114,7 @@ _NODISCARD constexpr _IndexType _Mdspan_checked_index_cast(_OtherIndexType&& _Id
 
 _EXPORT_STD template <class _ElementType, class _Extents, class _LayoutPolicy = layout_right,
     class _AccessorPolicy = default_accessor<_ElementType>>
-class __declspec(empty_bases) mdspan : private _Mdspan_accessor_base<_AccessorPolicy> {
+class mdspan : private _Mdspan_accessor_base<_AccessorPolicy> {
 public:
     using extents_type     = _Extents;
     using layout_type      = _LayoutPolicy;
