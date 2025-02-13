@@ -62,19 +62,17 @@ public:
 
 private:
     _NODISCARD static consteval auto _Make_dynamic_indices() noexcept {
-        array<rank_type, _Rank + 1> _Result{};
-        rank_type _Counter = 0;
-        for (rank_type _Idx = 0; _Idx < _Rank; ++_Idx) {
+        array<rank_type, _Rank> _Result{};
+        for (rank_type _Idx = 0, _Counter = 0; _Idx < _Rank; ++_Idx) {
             _Result[_Idx] = _Counter;
             if (_Static_extents[_Idx] == dynamic_extent) {
                 ++_Counter;
             }
         }
-        _Result[_Rank] = _Counter;
         return _Result;
     }
 
-    static constexpr array<rank_type, _Rank + 1> _Dynamic_indices = _Make_dynamic_indices();
+    static constexpr array<rank_type, _Rank> _Dynamic_indices = _Make_dynamic_indices();
 
     _NODISCARD static consteval auto _Make_dynamic_indices_inv() noexcept {
         array<rank_type, _Rank_dynamic> _Result{};
