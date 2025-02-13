@@ -1357,7 +1357,7 @@ private:
         return _Acc.access(_Ptr, static_cast<size_t>(_Map(_Indices...)));
     }
 
-    /* [[no_unique_address]] */ data_handle_type _Ptr = data_handle_type();
+    [[msvc::no_unique_address]] data_handle_type _Ptr = data_handle_type();
     [[msvc::no_unique_address]] mapping_type _Map;
     [[msvc::no_unique_address]] accessor_type _Acc;
 };
