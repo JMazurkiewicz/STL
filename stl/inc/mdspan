@@ -632,7 +632,6 @@ public:
     using rank_type    = extents_type::rank_type;
     using layout_type  = layout_right;
 
-private:
     static_assert(_Is_extents<extents_type>,
         "Extents must be a specialization of std::extents (N4950 [mdspan.layout.right.overview]/2).");
     static_assert(
@@ -640,7 +639,6 @@ private:
         "If Extents::rank_dynamic() == 0 is true, then the size of the multidimensional index space Extents() must be "
         "representable as a value of type typename Extents::index_type (N4950 [mdspan.layout.right.overview]/4).");
 
-public:
     constexpr mapping() noexcept               = default;
     constexpr mapping(const mapping&) noexcept = default;
 
