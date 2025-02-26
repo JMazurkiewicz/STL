@@ -566,8 +566,8 @@ span(array<_Ty, _Size>&) -> span<_Ty, _Size>;
 template <class _Ty, size_t _Size>
 span(const array<_Ty, _Size>&) -> span<const _Ty, _Size>;
 
-template <contiguous_iterator _It, class _End>
-span(_It, _End) -> span<remove_reference_t<iter_reference_t<_It>>>;
+template <contiguous_iterator _It, class _EndOrSize>
+span(_It, _EndOrSize) -> span<remove_reference_t<iter_reference_t<_It>>>;
 
 template <_RANGES contiguous_range _Rng>
 span(_Rng&&) -> span<remove_reference_t<_RANGES range_reference_t<_Rng>>>;
