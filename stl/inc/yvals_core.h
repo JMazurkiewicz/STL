@@ -411,6 +411,9 @@
 // P2614R2 Deprecating float_denorm_style, numeric_limits::has_denorm, numeric_limits::has_denorm_loss
 // Other C++23 deprecation warnings
 
+// _HAS_CXX26 directly controls:
+// P2389R2 dims
+
 // Parallel Algorithms Notes
 // C++ allows an implementation to implement parallel algorithms as calls to the serial algorithms.
 // This implementation parallelizes several common algorithm calls, but not all.
