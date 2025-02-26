@@ -1785,7 +1785,6 @@ _EMIT_STL_ERROR(STL1004, "C++98 unexpected() is incompatible with C++23 unexpect
 #define __cpp_lib_invoke_r                          202106L
 #define __cpp_lib_ios_noreplace                     202207L
 #define __cpp_lib_is_scoped_enum                    202011L
-#define __cpp_lib_mdspan                            202207L
 #define __cpp_lib_move_only_function                202110L
 #define __cpp_lib_out_ptr                           202311L
 #define __cpp_lib_print                             202406L
@@ -1850,6 +1849,12 @@ _EMIT_STL_ERROR(STL1004, "C++98 unexpected() is incompatible with C++23 unexpect
 #define __cpp_lib_execution 201603L // P0024R2 Parallel Algorithms
 #endif // language mode
 #endif // !defined(_M_CEE_PURE)
+
+#if _HAS_CXX26
+#define __cpp_lib_mdspan 202406L // P2389R2 dims
+#elif _HAS_CXX23
+#define __cpp_lib_mdspan 202207L // P0009R18 <mdspan>
+#endif
 
 #if _HAS_CXX23
 #define __cpp_lib_optional 202110L // P0798R8 Monadic Operations For optional
