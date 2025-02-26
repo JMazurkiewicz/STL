@@ -1459,9 +1459,16 @@ template <class _Pointer>
     requires (is_pointer_v<remove_reference_t<_Pointer>>)
 mdspan(_Pointer&&) -> mdspan<remove_pointer_t<remove_reference_t<_Pointer>>, extents<size_t>>;
 
+#if _HAS_CXX26
+template <class _ElementType, class... _Integrals>
+    requires conjunction_v<is_convertible<_Integrals, size_t>...> && (sizeof...(_Integrals) > 0)
+explicit mdspan(_ElementType*, _Integrals...)
+    -> mdspan<_ElementType, extents<size_t, _Maybe_static_ext<_Integrals>...>>;
+#else // ^^^ _HAS_CXX26 / !_HAS_CXX26 vvv
 template <class _ElementType, class... _Integrals>
     requires conjunction_v<is_convertible<_Integrals, size_t>...> && (sizeof...(_Integrals) > 0)
 explicit mdspan(_ElementType*, _Integrals...) -> mdspan<_ElementType, dextents<size_t, sizeof...(_Integrals)>>;
+#endif // ^^^ !_HAS_CXX26 ^^^
 
 template <class _ElementType, class _OtherIndexType, size_t _Nx>
 mdspan(_ElementType*, span<_OtherIndexType, _Nx>) -> mdspan<_ElementType, dextents<size_t, _Nx>>;
