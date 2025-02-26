@@ -403,6 +403,9 @@
 // P3235R3 std::print More Types Faster With Less Memory
 //     (partial implementation; see GH-4924)
 
+// _HAS_CXX26 controls:
+// P2389R2 dims
+
 // Parallel Algorithms Notes
 // C++ allows an implementation to implement parallel algorithms as calls to the serial algorithms.
 // This implementation parallelizes several common algorithm calls, but not all.
