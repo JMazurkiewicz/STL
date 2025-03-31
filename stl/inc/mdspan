@@ -1270,7 +1270,7 @@ public:
     constexpr explicit mdspan(data_handle_type _Ptr_, _OtherIndexTypes... _Exts)
         noexcept(is_nothrow_constructible_v<mapping_type, extents_type>
                  && is_nothrow_default_constructible_v<accessor_type>) // strengthened
-        : _Map(extents_type{static_cast<index_type>(_STD move(_Exts))...}), _Acc(), _Ptr(_STD move(_Ptr_)) {}
+        : _Ptr(_STD move(_Ptr_)), _Map(extents_type{static_cast<index_type>(_STD move(_Exts))...}), _Acc() {}
 
     template <class _OtherIndexType, size_t _Size>
         requires is_convertible_v<const _OtherIndexType&, index_type>
@@ -1280,7 +1280,7 @@ public:
     constexpr explicit(_Size != rank_dynamic()) mdspan(data_handle_type _Ptr_, span<_OtherIndexType, _Size> _Exts)
         noexcept(is_nothrow_constructible_v<mapping_type, extents_type>
                  && is_nothrow_default_constructible_v<accessor_type>) // strengthened
-        : _Map(extents_type{_Exts}), _Acc(), _Ptr(_STD move(_Ptr_)) {}
+        : _Ptr(_STD move(_Ptr_)), _Map(extents_type{_Exts}), _Acc() {}
 
     template <class _OtherIndexType, size_t _Size>
         requires is_convertible_v<const _OtherIndexType&, index_type>
@@ -1291,23 +1291,23 @@ public:
         mdspan(data_handle_type _Ptr_, const array<_OtherIndexType, _Size>& _Exts)
             noexcept(is_nothrow_constructible_v<mapping_type, extents_type>
                      && is_nothrow_default_constructible_v<accessor_type>) // strengthened
-        : _Map(extents_type{_Exts}), _Acc(), _Ptr(_STD move(_Ptr_)) {}
+        : _Ptr(_STD move(_Ptr_)), _Map(extents_type{_Exts}), _Acc() {}
 
     constexpr mdspan(data_handle_type _Ptr_, const extents_type& _Exts)
         noexcept(is_nothrow_constructible_v<mapping_type, const extents_type&>
                  && is_nothrow_default_constructible_v<accessor_type>) // strengthened
         requires is_constructible_v<mapping_type, const extents_type&> && is_default_constructible_v<accessor_type>
-        : _Map(_Exts), _Acc(), _Ptr(_STD move(_Ptr_)) {}
+        : _Ptr(_STD move(_Ptr_)), _Map(_Exts), _Acc() {}
 
     constexpr mdspan(data_handle_type _Ptr_, const mapping_type& _Map_)
         noexcept(is_nothrow_copy_constructible_v<mapping_type>
                  && is_nothrow_default_constructible_v<accessor_type>) // strengthened
         requires is_default_constructible_v<accessor_type>
-        : _Map(_Map_), _Acc(), _Ptr(_STD move(_Ptr_)) {}
+        : _Ptr(_STD move(_Ptr_)), _Map(_Map_), _Acc() {}
 
     constexpr mdspan(data_handle_type _Ptr_, const mapping_type& _Map_, const accessor_type& _Acc_) noexcept(
         is_nothrow_copy_constructible_v<mapping_type> && is_nothrow_copy_constructible_v<accessor_type>) // strengthened
-        : _Map(_Map_), _Acc(_Acc_), _Ptr(_STD move(_Ptr_)) {}
+        : _Ptr(_STD move(_Ptr_)), _Map(_Map_), _Acc(_Acc_) {}
 
     template <class _OtherElementType, class _OtherExtents, class _OtherLayoutPolicy, class _OtherAccessor>
         requires is_constructible_v<mapping_type, const typename _OtherLayoutPolicy::template mapping<_OtherExtents>&>
@@ -1320,7 +1320,7 @@ public:
                      && is_nothrow_constructible_v<mapping_type,
                          const typename _OtherLayoutPolicy::template mapping<_OtherExtents>&>
                      && is_nothrow_constructible_v<accessor_type, const _OtherAccessor&>) // strengthened
-        : _Map(_Other.mapping()), _Acc(_Other.accessor()), _Ptr(_Other.data_handle()) {
+        : _Ptr(_Other.data_handle()), _Map(_Other.mapping()), _Acc(_Other.accessor()) {
         static_assert(is_constructible_v<data_handle_type, const typename _OtherAccessor::data_handle_type&>,
             "The data_handle_type must be constructible from const typename OtherAccessor::data_handle_type& (N4950 "
             "[mdspan.mdspan.cons]/20.1).");
@@ -1477,9 +1477,9 @@ private:
         return _Acc.access(_Ptr, static_cast<size_t>(_Map(_Indices...)));
     }
 
+    _MSVC_NO_UNIQUE_ADDRESS data_handle_type _Ptr = data_handle_type();
     _MSVC_NO_UNIQUE_ADDRESS mapping_type _Map;
     _MSVC_NO_UNIQUE_ADDRESS accessor_type _Acc;
-    _MSVC_NO_UNIQUE_ADDRESS data_handle_type _Ptr = data_handle_type();
 };
 
 template <class _CArray>
