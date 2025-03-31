@@ -1285,8 +1285,8 @@ public:
                                 && is_nothrow_default_constructible_v<mapping_type>
                                 && is_nothrow_default_constructible_v<accessor_type>) // strengthened
         requires (rank_dynamic() > 0) && is_default_constructible_v<data_handle_type>
-              && is_default_constructible_v<mapping_type> && is_default_constructible_v<accessor_type>
-        : _Map() {}
+                  && is_default_constructible_v<mapping_type> && is_default_constructible_v<accessor_type>
+        : _Map(), _Accessor() {}
 
     constexpr mdspan(const mdspan&) = default;
     constexpr mdspan(mdspan&&)      = default;
@@ -1441,10 +1441,7 @@ public:
     friend constexpr void swap(mdspan& _Left, mdspan& _Right) noexcept {
         swap(_Left._Ptr, _Right._Ptr); // intentional ADL
         swap(_Left._Map, _Right._Map); // intentional ADL
-
-        if constexpr (!_Elidable_accessor_policy<accessor_type>) {
-            swap(_Left._Accessor._Acc, _Right._Accessor._Acc); // intentional ADL
-        }
+        swap(_Left._Accessor, _Right._Accessor); // intentional ADL
     }
 
     _NODISCARD constexpr const extents_type& extents() const noexcept {
@@ -1460,7 +1457,7 @@ public:
     }
 
     _NODISCARD constexpr const accessor_type& accessor() const noexcept {
-        return _Accessor._Acc;
+        return _Accessor;
     }
 
     _NODISCARD static constexpr bool is_always_unique() noexcept /* strengthened */ {
@@ -1498,7 +1495,7 @@ public:
 private:
     template <class... _OtherIndexTypes>
     _NODISCARD constexpr reference _Access_impl(_OtherIndexTypes... _Indices) const
-        noexcept(noexcept(_Accessor._Acc.access(_Ptr, static_cast<size_t>(_Map(_Indices...))))) {
+        noexcept(noexcept(_Accessor.access(_Ptr, static_cast<size_t>(_Map(_Indices...))))) {
         _STL_INTERNAL_STATIC_ASSERT(conjunction_v<is_same<_OtherIndexTypes, index_type>...>);
 #if _MSVC_STL_HARDENING_MDSPAN || _ITERATOR_DEBUG_LEVEL != 0
         _STL_VERIFY(_Map.extents()._Contains_multidimensional_index(make_index_sequence<rank()>{}, _Indices...),
@@ -1506,11 +1503,11 @@ private:
             "index in extents() (N5001 [mdspan.mdspan.members]/3).");
 #endif
 
-        return _Accessor._Acc.access(_Ptr, static_cast<size_t>(_Map(_Indices...)));
+        return _Accessor.access(_Ptr, static_cast<size_t>(_Map(_Indices...)));
     }
 
     _MSVC_NO_UNIQUE_ADDRESS mapping_type _Map;
-    _MSVC_NO_UNIQUE_ADDRESS _Mdspan_accessor_holder<accessor_type> _Accessor;
+    _MSVC_NO_UNIQUE_ADDRESS accessor_type _Accessor;
     _MSVC_NO_UNIQUE_ADDRESS data_handle_type _Ptr = data_handle_type();
 };
 
