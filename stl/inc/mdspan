@@ -1257,7 +1257,7 @@ public:
                                 && is_nothrow_default_constructible_v<accessor_type>) // strengthened
         requires (rank_dynamic() > 0) && is_default_constructible_v<data_handle_type>
                   && is_default_constructible_v<mapping_type> && is_default_constructible_v<accessor_type>
-        : _Map(), _Accessor() {}
+        : _Map(), _Acc() {}
 
     constexpr mdspan(const mdspan&) = default;
     constexpr mdspan(mdspan&&)      = default;
@@ -1270,7 +1270,7 @@ public:
     constexpr explicit mdspan(data_handle_type _Ptr_, _OtherIndexTypes... _Exts)
         noexcept(is_nothrow_constructible_v<mapping_type, extents_type>
                  && is_nothrow_default_constructible_v<accessor_type>) // strengthened
-        : _Map(extents_type{static_cast<index_type>(_STD move(_Exts))...}), _Accessor(), _Ptr(_STD move(_Ptr_)) {}
+        : _Map(extents_type{static_cast<index_type>(_STD move(_Exts))...}), _Acc(), _Ptr(_STD move(_Ptr_)) {}
 
     template <class _OtherIndexType, size_t _Size>
         requires is_convertible_v<const _OtherIndexType&, index_type>
@@ -1280,7 +1280,7 @@ public:
     constexpr explicit(_Size != rank_dynamic()) mdspan(data_handle_type _Ptr_, span<_OtherIndexType, _Size> _Exts)
         noexcept(is_nothrow_constructible_v<mapping_type, extents_type>
                  && is_nothrow_default_constructible_v<accessor_type>) // strengthened
-        : _Map(extents_type{_Exts}), _Accessor(), _Ptr(_STD move(_Ptr_)) {}
+        : _Map(extents_type{_Exts}), _Acc(), _Ptr(_STD move(_Ptr_)) {}
 
     template <class _OtherIndexType, size_t _Size>
         requires is_convertible_v<const _OtherIndexType&, index_type>
@@ -1291,23 +1291,23 @@ public:
         mdspan(data_handle_type _Ptr_, const array<_OtherIndexType, _Size>& _Exts)
             noexcept(is_nothrow_constructible_v<mapping_type, extents_type>
                      && is_nothrow_default_constructible_v<accessor_type>) // strengthened
-        : _Map(extents_type{_Exts}), _Accessor(), _Ptr(_STD move(_Ptr_)) {}
+        : _Map(extents_type{_Exts}), _Acc(), _Ptr(_STD move(_Ptr_)) {}
 
     constexpr mdspan(data_handle_type _Ptr_, const extents_type& _Exts)
         noexcept(is_nothrow_constructible_v<mapping_type, const extents_type&>
                  && is_nothrow_default_constructible_v<accessor_type>) // strengthened
         requires is_constructible_v<mapping_type, const extents_type&> && is_default_constructible_v<accessor_type>
-        : _Map(_Exts), _Accessor(), _Ptr(_STD move(_Ptr_)) {}
+        : _Map(_Exts), _Acc(), _Ptr(_STD move(_Ptr_)) {}
 
     constexpr mdspan(data_handle_type _Ptr_, const mapping_type& _Map_)
         noexcept(is_nothrow_copy_constructible_v<mapping_type>
                  && is_nothrow_default_constructible_v<accessor_type>) // strengthened
         requires is_default_constructible_v<accessor_type>
-        : _Map(_Map_), _Accessor(), _Ptr(_STD move(_Ptr_)) {}
+        : _Map(_Map_), _Acc(), _Ptr(_STD move(_Ptr_)) {}
 
     constexpr mdspan(data_handle_type _Ptr_, const mapping_type& _Map_, const accessor_type& _Acc_) noexcept(
         is_nothrow_copy_constructible_v<mapping_type> && is_nothrow_copy_constructible_v<accessor_type>) // strengthened
-        : _Map(_Map_), _Accessor(_Acc_), _Ptr(_STD move(_Ptr_)) {}
+        : _Map(_Map_), _Acc(_Acc_), _Ptr(_STD move(_Ptr_)) {}
 
     template <class _OtherElementType, class _OtherExtents, class _OtherLayoutPolicy, class _OtherAccessor>
         requires is_constructible_v<mapping_type, const typename _OtherLayoutPolicy::template mapping<_OtherExtents>&>
@@ -1320,7 +1320,7 @@ public:
                      && is_nothrow_constructible_v<mapping_type,
                          const typename _OtherLayoutPolicy::template mapping<_OtherExtents>&>
                      && is_nothrow_constructible_v<accessor_type, const _OtherAccessor&>) // strengthened
-        : _Map(_Other.mapping()), _Accessor(_Other.accessor()), _Ptr(_Other.data_handle()) {
+        : _Map(_Other.mapping()), _Acc(_Other.accessor()), _Ptr(_Other.data_handle()) {
         static_assert(is_constructible_v<data_handle_type, const typename _OtherAccessor::data_handle_type&>,
             "The data_handle_type must be constructible from const typename OtherAccessor::data_handle_type& (N4950 "
             "[mdspan.mdspan.cons]/20.1).");
@@ -1412,7 +1412,7 @@ public:
     friend constexpr void swap(mdspan& _Left, mdspan& _Right) noexcept {
         swap(_Left._Ptr, _Right._Ptr); // intentional ADL
         swap(_Left._Map, _Right._Map); // intentional ADL
-        swap(_Left._Accessor, _Right._Accessor); // intentional ADL
+        swap(_Left._Acc, _Right._Acc); // intentional ADL
     }
 
     _NODISCARD constexpr const extents_type& extents() const noexcept {
@@ -1428,7 +1428,7 @@ public:
     }
 
     _NODISCARD constexpr const accessor_type& accessor() const noexcept {
-        return _Accessor;
+        return _Acc;
     }
 
     _NODISCARD static constexpr bool is_always_unique() noexcept /* strengthened */ {
@@ -1466,7 +1466,7 @@ public:
 private:
     template <class... _OtherIndexTypes>
     _NODISCARD constexpr reference _Access_impl(_OtherIndexTypes... _Indices) const
-        noexcept(noexcept(_Accessor.access(_Ptr, static_cast<size_t>(_Map(_Indices...))))) {
+        noexcept(noexcept(_Acc.access(_Ptr, static_cast<size_t>(_Map(_Indices...))))) {
         _STL_INTERNAL_STATIC_ASSERT(conjunction_v<is_same<_OtherIndexTypes, index_type>...>);
 #if _MSVC_STL_HARDENING_MDSPAN || _ITERATOR_DEBUG_LEVEL != 0
         _STL_VERIFY(_Map.extents()._Contains_multidimensional_index(make_index_sequence<rank()>{}, _Indices...),
@@ -1474,11 +1474,11 @@ private:
             "index in extents() (N5001 [mdspan.mdspan.members]/3).");
 #endif
 
-        return _Accessor.access(_Ptr, static_cast<size_t>(_Map(_Indices...)));
+        return _Acc.access(_Ptr, static_cast<size_t>(_Map(_Indices...)));
     }
 
     _MSVC_NO_UNIQUE_ADDRESS mapping_type _Map;
-    _MSVC_NO_UNIQUE_ADDRESS accessor_type _Accessor;
+    _MSVC_NO_UNIQUE_ADDRESS accessor_type _Acc;
     _MSVC_NO_UNIQUE_ADDRESS data_handle_type _Ptr = data_handle_type();
 };
 
