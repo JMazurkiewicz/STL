@@ -47,7 +47,7 @@ static_assert(nua_friendly<layout_right::mapping<extents<long>>>);
 static_assert(!nua_friendly<layout_stride::mapping<dextents<long long, 2>>>);
 static_assert(!nua_friendly<layout_stride::mapping<extents<long long, 3, dynamic_extent>>>);
 static_assert(!nua_friendly<layout_stride::mapping<extents<long long, 3, 3>>>);
-// static_assert(nua_friendly<layout_stride::mapping<extents<long long>>>); // TODO Investigate.
+static_assert(nua_friendly<layout_stride::mapping<extents<long long>>>);
 
 // When
 // * 'Mds::accessor_type' is a specialization of 'default_accessor', and
@@ -55,15 +55,21 @@ static_assert(!nua_friendly<layout_stride::mapping<extents<long long, 3, 3>>>);
 //   * 'layout_left' or 'layout_right' and 'Mds::extents_type::rank_dynamic() == 0', or
 //   * 'layout_stride' and 'Mds::extents_type::rank() == 0'
 // then 'sizeof(Mds) == sizeof(void*)'.
-// static_assert(sizeof(mdspan<int, extents<int, 3, 3, 3>, layout_left>) == sizeof(void*)); // TODO Investigate.
+#if !defined(__clang__) && !defined(__EDG__)
+static_assert(sizeof(mdspan<int, extents<int, 3, 3, 3>, layout_left>) == sizeof(void*));
+#endif
 static_assert(sizeof(mdspan<int, dextents<int, 3>, layout_left>) > sizeof(void*));
 static_assert(sizeof(mdspan<int, extents<int, 3, 3, 3>, layout_left, TrivialAccessor<int>>) > sizeof(void*));
 
-// static_assert(sizeof(mdspan<long, extents<long, 2, 2, 2>, layout_right>) == sizeof(void*)); // TODO Investigate
+#if !defined(__clang__) && !defined(__EDG__)
+static_assert(sizeof(mdspan<long, extents<long, 2, 2, 2>, layout_right>) == sizeof(void*));
+#endif
 static_assert(sizeof(mdspan<long, dextents<long, 2>, layout_right>) > sizeof(void*));
 static_assert(sizeof(mdspan<long, extents<long, 2, 2, 2>, layout_right, TrivialAccessor<long>>) > sizeof(void*));
 
-// static_assert(sizeof(mdspan<short, extents<short>, layout_stride>) == sizeof(void*)); // TODO Investigate.
+#if !defined(__clang__) && !defined(__EDG__)
+static_assert(sizeof(mdspan<short, extents<short>, layout_stride>) == sizeof(void*));
+#endif
 static_assert(sizeof(mdspan<short, extents<short, 4, 4, 4>, layout_stride>) > sizeof(void*));
 static_assert(sizeof(mdspan<short, dextents<short, 4>, layout_stride>) > sizeof(void*));
 static_assert(sizeof(mdspan<short, extents<short, 4, 4, 4>, layout_stride, TrivialAccessor<short>>) > sizeof(void*));
