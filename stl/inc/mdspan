@@ -30,18 +30,25 @@ _STL_DISABLE_CLANG_WARNINGS
 #undef no_specializations
 
 _STD_BEGIN
-template <class _IndexType, size_t _Size>
+enum class _Mdspan_array_tag {
+    _Ignore,
+    _Extents,
+    _Strides,
+};
+
+template <class _IndexType, size_t _Size, _Mdspan_array_tag _Tag = _Mdspan_array_tag::_Ignore>
 struct _Maybe_empty_array {
     using type = array<_IndexType, _Size>;
 
     array<_IndexType, _Size> _Array{};
 };
 
+template <_Mdspan_array_tag>
 struct _Empty_array {};
 
-template <class _IndexType>
-struct _Maybe_empty_array<_IndexType, 0> {
-    using type = _Empty_array;
+template <class _IndexType, _Mdspan_array_tag _Tag>
+struct _Maybe_empty_array<_IndexType, 0, _Tag> {
+    using type = _Empty_array<_Tag>;
 };
 
 template <size_t... _Extents>
