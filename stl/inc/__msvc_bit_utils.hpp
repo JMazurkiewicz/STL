@@ -178,13 +178,20 @@ _NODISCARD constexpr int _Popcount_fallback(_Ty _Val) noexcept {
     }
 }
 
-#if ((defined(_M_IX86) && !defined(_M_HYBRID_X86_ARM64)) || (defined(_M_X64) && !defined(_M_ARM64EC))) \
-    && !defined(_M_CEE_PURE) && !defined(__CUDACC__)
+#if !defined(_M_CEE_PURE) && !defined(__CUDACC__)
+#define _HAS_COUNTR_ZERO_INTRINSICS 1
+#else // ^^^ intrinsics available / intrinsics unavailable vvv
+#define _HAS_COUNTR_ZERO_INTRINSICS 0
+#endif // ^^^ intrinsics unavailable ^^^
+
+#if _HAS_COUNTR_ZERO_INTRINSICS \
+    && ((defined(_M_IX86) && !defined(_M_HYBRID_X86_ARM64)) || (defined(_M_X64) && !defined(_M_ARM64EC)))
 #define _HAS_TZCNT_BSF_INTRINSICS 1
 #else // ^^^ intrinsics available / intrinsics unavailable vvv
 #define _HAS_TZCNT_BSF_INTRINSICS 0
 #endif // ^^^ intrinsics unavailable ^^^
 
+#if _HAS_COUNTR_ZERO_INTRINSICS
 #if _HAS_TZCNT_BSF_INTRINSICS
 #ifdef __clang__
 #define _TZCNT_U32 __builtin_ia32_tzcnt_u32
@@ -273,6 +280,28 @@ _NODISCARD int _Checked_x86_x64_countr_zero(const _Ty _Val) noexcept {
 
 #endif // _HAS_TZCNT_BSF_INTRINSICS
 
+#if defined(_M_ARM) || defined(_M_ARM64) || defined(_M_ARM64EC) || defined(_M_HYBRID_X86_ARM64)
+template <class _Ty>
+_NODISCARD int _Checked_arm64_countr_zero(const _Ty _Val) noexcept {
+#ifdef __clang__
+    return __builtin_ctzg(_Val, 0);
+#else // ^^^ Clang / Other compiler vvv
+    constexpr int _Digits = _Unsigned_integer_digits<_Ty>;
+    if (_Val == 0) {
+        return _Digits;
+    }
+
+    if constexpr (_Digits <= 32) {
+        return static_cast<int>(_CountTrailingZeros(_Val)) - (_Unsigned_integer_digits<unsigned long> - _Digits);
+    } else {
+        return static_cast<int>(_CountTrailingZeros64(_Val));
+    }
+#endif // ^^^ Other compiler ^^^
+}
+#endif // defined(_M_ARM) || defined(_M_ARM64) || defined(_M_ARM64EC) || defined(_M_HYBRID_X86_ARM64)
+
+#endif // _HAS_COUNTR_ZERO_INTRINSICS
+
 #if (defined(_M_IX86) || defined(_M_X64) || defined(_M_ARM64)) && !defined(_M_CEE_PURE) && !defined(__CUDACC__)
 #define _HAS_POPCNT_INTRINSICS 1
 #if defined(__AVX__) || defined(_M_ARM64) || defined(_M_ARM64EC)
@@ -320,14 +349,15 @@ constexpr bool _Is_standard_unsigned_integer =
 
 template <class _Ty, enable_if_t<_Is_standard_unsigned_integer<_Ty>, int> = 0>
 _NODISCARD _CONSTEXPR20 int _Countr_zero(const _Ty _Val) noexcept {
+#if _HAS_COUNTR_ZERO_INTRINSICS
+    if (!_STD _Is_constant_evaluated()) {
 #if _HAS_TZCNT_BSF_INTRINSICS
-#if _HAS_CXX20
-    if (!_STD is_constant_evaluated())
-#endif // _HAS_CXX20
-    {
         return _Checked_x86_x64_countr_zero(_Val);
+#elif defined(_M_ARM) || defined(_M_ARM64) || defined(_M_ARM64EC) || defined(_M_HYBRID_X86_ARM64)
+        return _Checked_arm64_countr_zero(_Val);
+#endif // defined(_M_ARM) || defined(_M_ARM64) || defined(_M_ARM64EC) || defined(_M_HYBRID_X86_ARM64)
     }
-#endif // _HAS_TZCNT_BSF_INTRINSICS
+#endif // _HAS_COUNTR_ZERO_INTRINSICS
     return _Countr_zero_fallback(_Val);
 }
 
