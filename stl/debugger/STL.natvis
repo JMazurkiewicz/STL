@@ -2303,6 +2303,54 @@ SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
     <DisplayString>{{ rank={extents_type::_Rank}, rank_dynamic={extents_type::_Rank_dynamic} }}</DisplayString>
     <Expand>
       <Item Name="[extents]" Optional="true">_Exts</Item>
+
+      <Synthetic Name="[strides]" Condition="extents_type::_Rank != 0">
+        <DisplayString>{{ size={extents_type::_Rank} }}</DisplayString>
+        <Expand>
+          <!-- Mixed static and dynamic extents -->
+          <CustomListItems Condition="extents_type::_Rank != extents_type::_Rank_dynamic" Optional="true">
+            <Variable Name="idx" InitialValue="0" />
+            <Variable Name="stride" InitialValue="(index_type) 1" />
+            <Variable Name="statptr" InitialValue="(const rank_type*) extents_type::_Static_extents._Elems" />
+            <Variable Name="dynptr" InitialValue="(index_type*) _Exts._Array._Elems" />
+            <Loop>
+              <Break Condition="idx == extents_type::_Rank" />
+              <Item>stride</Item>
+              <If Condition="*statptr == -1">
+                <Exec>stride *= *dynptr++</Exec>
+              </If>
+              <If Condition="*statptr != -1">
+                <Exec>stride *= *statptr</Exec>
+              </If>
+              <Exec>++idx, ++statptr</Exec>
+            </Loop>
+          </CustomListItems>
+
+          <!-- Fully dynamic extents -->
+          <CustomListItems Condition="extents_type::_Rank == extents_type::_Rank_dynamic" Optional="true">
+            <Variable Name="idx" InitialValue="0" />
+            <Variable Name="stride" InitialValue="(index_type) 1"/>
+            <Variable Name="dynptr" InitialValue="(index_type*) _Exts._Array._Elems" />
+            <Loop>
+              <Break Condition="idx == extents_type::_Rank_dynamic" />
+              <Item>stride</Item>
+              <Exec>++idx, stride *= *dynptr++</Exec>
+            </Loop>
+          </CustomListItems>
+
+          <!-- Fully static extents -->
+          <CustomListItems Condition="extents_type::_Rank_dynamic == 0" Optional="true">
+            <Variable Name="idx" InitialValue="0" />
+            <Variable Name="stride" InitialValue="(index_type) 1" />
+            <Variable Name="statptr" InitialValue="(const rank_type*) extents_type::_Static_extents._Elems" />
+            <Loop>
+              <Break Condition="idx == extents_type::_Rank" />
+              <Item>stride</Item>
+              <Exec>++idx, stride *= *statptr++</Exec>
+            </Loop>
+          </CustomListItems>
+        </Expand>
+      </Synthetic>
     </Expand>
   </Type>
 
